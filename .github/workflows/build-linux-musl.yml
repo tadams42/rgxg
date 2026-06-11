@@ -1,0 +1,54 @@
+---
+name: Release Linux musl
+
+on:
+  push:
+    branches:
+      - build
+
+permissions:
+  contents: write
+
+jobs:
+  build-musl:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          ref: build
+
+      - name: Install dependencies
+        run: sudo apt-get install -y musl-tools autoconf automake libtool
+
+      - name: autoconf
+        run: sh autogen.sh
+
+      - name: configure
+        run: ./configure LDFLAGS="-static" --disable-shared
+        env:
+          CC: musl-gcc
+
+      - name: make
+        run: make
+
+      - name: Get version
+        run: echo "VERSION=$(git describe --always)" >> "$GITHUB_ENV"
+
+      - name: Package
+        run: |
+          ARCHIVE=rgxg-x86_64-unknown-linux-musl.tar.gz
+          tar -czf "$ARCHIVE" rgxg man/rgxg.1 completions/
+          echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
+
+      - name: Create release
+        run: gh release create --latest "$VERSION" "$ARCHIVE"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release asset
+        run: gh release upload "$VERSION" "$ARCHIVE" --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
