@@ -1,0 +1,68 @@
+#compdef rgxg
+
+# Zsh completion for rgxg
+
+_rgxg() {
+    local state
+
+    _arguments \
+        '(-v)-h[display help and exit]' \
+        '(-h)-v[print version and exit]' \
+        '1: :->command' \
+        '*: :->args'
+
+    case $state in
+        command)
+            _values 'command' \
+                'alternation[create regex that matches any of the given patterns]' \
+                'cidr[create regex that matches all addresses of the given CIDR block]' \
+                'escape[escape the given string for use in a regex]' \
+                'range[create regex that matches integers in a given range]' \
+                'help[describe the usage of rgxg or a given command]' \
+                'version[print the version of rgxg]'
+            ;;
+        args)
+            case ${words[2]} in
+                alternation)
+                    _arguments \
+                        '-N[omit outer parentheses]' \
+                        '-h[display help and exit]' \
+                        '*:pattern:'
+                    ;;
+                cidr)
+                    _arguments \
+                        '-N[omit outer parentheses]' \
+                        '-l[match only lower case letters]' \
+                        '-U[match only upper case letters]' \
+                        '-u[do not match IPv6 addresses with zero compression]' \
+                        '-s[do not match IPv6 addresses in mixed notation]' \
+                        '-h[display help and exit]' \
+                        ':CIDR block:'
+                    ;;
+                escape)
+                    _arguments \
+                        '-h[display help and exit]' \
+                        ':string:'
+                    ;;
+                range)
+                    _arguments \
+                        '-b[generate regex for number range with given base]:BASE:(2 8 10 16)' \
+                        '-N[omit outer parentheses]' \
+                        '-l[match only lower case letters for bases > 10]' \
+                        '-U[match only upper case letters for bases > 10]' \
+                        '-h[display help and exit]' \
+                        '-z[match numbers with leading zeros]' \
+                        '-Z[match numbers with variable number of leading zeros]' \
+                        '-m[minimum length of matched numbers]:LENGTH:' \
+                        ':FIRST:' \
+                        '::LAST:'
+                    ;;
+                help)
+                    _values 'command' alternation cidr escape range
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+_rgxg
