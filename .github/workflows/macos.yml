@@ -1,7 +1,10 @@
 ---
 name: rgxg CI macOS
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
